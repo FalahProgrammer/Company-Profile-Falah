@@ -21,8 +21,10 @@ const CLARITY_ID = process.env.CLARITY_PROJECT_ID || "v03jaczk0n";
 
 type Params = { locale: string };
 
-export const dynamicParams = false;
-
+// No `dynamicParams = false` here: it is inherited by every page below, and
+// with it an on-demand revalidation (CMS publish → revalidateTag) makes Next
+// answer 404 (NoFallbackError) for all pages until the next deploy. Unknown
+// locales are rejected by `notFound()` in the layout instead.
 export function generateStaticParams(): Params[] {
   return locales.map((locale) => ({ locale }));
 }
