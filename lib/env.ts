@@ -15,6 +15,10 @@ const schema = z.object({
   CMS_PUBLIC_URL: optional(z.string().url()),
   REVALIDATE_SECRET: optional(z.string().min(32)),
   CMS_CONTACT_API_KEY: optional(z.string().min(32)),
+  /** Public address of this website (https://example.com): absolute URLs in the sitemap, canonical links and previews. */
+  SITE_URL: optional(z.string().url()),
+  /** Google Search Console "HTML tag" verification: the content of the google-site-verification meta tag. */
+  GOOGLE_SITE_VERIFICATION: optional(z.string().min(10)),
 });
 
 const parsed = schema.safeParse(process.env);

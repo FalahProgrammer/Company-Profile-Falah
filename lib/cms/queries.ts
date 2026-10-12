@@ -41,6 +41,16 @@ export async function getPageSlugs(): Promise<string[]> {
   return docs.map((d) => d.slug);
 }
 
+/** Slug and last change of every published page, for the sitemap. */
+export async function getPagesForSitemap(): Promise<Pick<Page, "slug" | "updatedAt">[]> {
+  if (!cmsConfigured) return [];
+  const { docs } = await cmsFetch<PaginatedDocs<Pick<Page, "slug" | "updatedAt">>>("/api/pages", {
+    query: { ...published, "select[slug]": true, "select[updatedAt]": true, depth: 0, limit: 200 },
+    tags: ["pages"],
+  });
+  return docs;
+}
+
 export const getSolutionCategories = cache(async (locale: Locale): Promise<SolutionCategory[]> => {
   if (!cmsConfigured) return [];
   const { docs } = await cmsFetch<PaginatedDocs<SolutionCategory>>("/api/solution-categories", {

@@ -10,7 +10,9 @@ import { fontVariables } from "@/lib/fonts";
 import { buildMegaMenu } from "@/lib/cms/mega-menu";
 import { getFooter, getNavigation, getProducts, getSiteSettings, getSolutionCategories } from "@/lib/cms/queries";
 import { isLocale, locales } from "@/lib/i18n/config";
+import { env } from "@/lib/env";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { siteUrl } from "@/lib/site";
 import "../globals.css";
 
 const FALLBACK_TITLE = "Falah Inovasi Teknologi";
@@ -32,7 +34,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const settings = await getSiteSettings(locale);
   const siteName = settings?.siteName ?? FALLBACK_TITLE;
   const logo = mediaUrl(settings?.logo);
+  const base = siteUrl();
   return {
+    // Makes canonical, hreflang and preview-image URLs absolute.
+    metadataBase: base ? new URL(base) : undefined,
+    verification: env.GOOGLE_SITE_VERIFICATION ? { google: env.GOOGLE_SITE_VERIFICATION } : undefined,
     title: { default: siteName, template: `%s | ${siteName}` },
     description: settings?.siteDescription,
     openGraph: {

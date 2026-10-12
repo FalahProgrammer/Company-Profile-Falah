@@ -28,6 +28,10 @@ ARG CMS_PUBLIC_URL
 # Where CMS media comes from: the public bucket / CDN URL, or the internal URL
 # of the bucket when /media is proxied (falah-deploy/.env.example explains).
 ARG CMS_MEDIA_URL
+# The website's own public address and the Google Search Console token: used in
+# canonical links and the meta tag, which some pages bake in at build time.
+ARG SITE_URL
+ARG GOOGLE_SITE_VERIFICATION
 
 # No CMS_URL on purpose: the build must not depend on the CMS being up. Pages
 # are then rendered on demand and cached as visitors arrive.
@@ -36,6 +40,8 @@ RUN NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     CMS_PUBLIC_URL="${CMS_PUBLIC_URL:-}" \
     CMS_MEDIA_URL="${CMS_MEDIA_URL:-}" \
+    SITE_URL="${SITE_URL:-}" \
+    GOOGLE_SITE_VERIFICATION="${GOOGLE_SITE_VERIFICATION:-}" \
     npm run build
 
 # ── run ──────────────────────────────────────────────────────────────
