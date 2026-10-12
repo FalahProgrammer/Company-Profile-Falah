@@ -9,6 +9,7 @@ import { LocaleLink } from "@/components/i18n/locale-link";
 import { useI18n } from "@/components/i18n/locale-provider";
 import { Button } from "@/components/ui/button";
 import type { MegaMenuCategory } from "@/lib/cms/mega-menu";
+import { visibleLinks } from "@/lib/cms/navigation";
 import { mediaUrl } from "@/lib/cms/media";
 import { useDelayedUnmount } from "@/lib/use-animated";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,7 @@ export function Navbar({
   solutions: MegaMenuCategory[];
   logo?: Media | null;
 }) {
-  const navLinks = navigation.links ?? [];
+  const navLinks = visibleLinks(navigation.links);
   const cta = navigation.cta;
   const solutionsLabel = navigation.solutionsLabel || "Our Solutions";
   const logoUrl = mediaUrl(logo);
