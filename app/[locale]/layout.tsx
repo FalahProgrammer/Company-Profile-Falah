@@ -12,10 +12,9 @@ import { getFooter, getNavigation, getProducts, getSiteSettings, getSolutionCate
 import { isLocale, locales } from "@/lib/i18n/config";
 import { env } from "@/lib/env";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { FALLBACK_SITE_NAME, openGraphFor } from "@/lib/seo/metadata";
 import { siteUrl } from "@/lib/site";
 import "../globals.css";
-
-const FALLBACK_TITLE = "Falah Inovasi Teknologi";
 
 /** Microsoft Clarity project (public id). Only the live site is measured: not local dev, not the editor. */
 const CLARITY_ID = process.env.CLARITY_PROJECT_ID || "v03jaczk0n";
@@ -32,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const settings = await getSiteSettings(locale);
-  const siteName = settings?.siteName ?? FALLBACK_TITLE;
+  const siteName = settings?.siteName ?? FALLBACK_SITE_NAME;
   const logo = mediaUrl(settings?.logo);
   const base = siteUrl();
   return {
@@ -41,12 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     verification: env.GOOGLE_SITE_VERIFICATION ? { google: env.GOOGLE_SITE_VERIFICATION } : undefined,
     title: { default: siteName, template: `%s | ${siteName}` },
     description: settings?.siteDescription,
-    openGraph: {
-      siteName,
-      type: "website",
-      locale: locale === "id" ? "id_ID" : "en_US",
-      images: logo ? [logo] : undefined,
-    },
+    openGraph: openGraphFor(locale, siteName, logo),
   };
 }
 

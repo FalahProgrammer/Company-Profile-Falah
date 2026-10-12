@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 
 import { RenderBlocks } from "@/components/blocks/RenderBlocks";
 import { mediaUrl } from "@/lib/cms/media";
-import { getPage, getPageSlugs, getSiteData } from "@/lib/cms/queries";
+import { getPage, getPageSlugs, getSiteData, getSiteSettings } from "@/lib/cms/queries";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localeAlternates } from "@/lib/i18n/metadata";
+import { FALLBACK_SITE_NAME, pageMetadata } from "@/lib/seo/metadata";
 
 const HOME_SLUG = "home";
 
@@ -28,20 +29,19 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { locale, slug: segments } = await params;
   const slug = resolveSlug(segments);
   if (!isLocale(locale) || !slug) return {};
-  const page = await getPage(slug, locale);
+  const [page, settings] = await Promise.all([getPage(slug, locale), getSiteSettings(locale)]);
   if (!page) return {};
 
   const isHome = slug === HOME_SLUG;
-  const image = mediaUrl(page.meta?.image);
-  const metadata: Metadata = {
-    description: page.meta?.description || undefined,
-    openGraph: image ? { images: [image] } : undefined,
+  return pageMetadata({
+    locale,
+    siteName: settings?.siteName ?? FALLBACK_SITE_NAME,
+    // The home page keeps the site name from the layout unless an SEO title is set.
+    title: isHome ? page.meta?.title : page.meta?.title || page.title,
+    description: page.meta?.description,
+    image: mediaUrl(page.meta?.image),
     alternates: localeAlternates(isHome ? "" : slug, locale),
-  };
-  // The home page keeps the site name from the layout unless an SEO title is set.
-  const title = isHome ? page.meta?.title : page.meta?.title || page.title;
-  if (title) metadata.title = title;
-  return metadata;
+  });
 }
 
 export default async function CmsPage({ params }: { params: Promise<Params> }) {

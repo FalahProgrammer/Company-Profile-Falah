@@ -7,10 +7,11 @@ import { HeroSection } from "@/components/solution-category/HeroSection";
 import { ShowcaseSection } from "@/components/solution-category/ShowcaseSection";
 import { Reveal } from "@/components/ui/reveal";
 import { mediaUrl } from "@/lib/cms/media";
-import { getSolutionCategories, getSolutionCategory } from "@/lib/cms/queries";
+import { getSiteSettings, getSolutionCategories, getSolutionCategory } from "@/lib/cms/queries";
 import { isLocale, locales, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localeAlternates } from "@/lib/i18n/metadata";
+import { FALLBACK_SITE_NAME, pageMetadata } from "@/lib/seo/metadata";
 
 type Params = { locale: string; category: string };
 
@@ -29,15 +30,16 @@ export async function generateStaticParams(): Promise<Params[]> {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { locale, category: slug } = await params;
   if (!isLocale(locale)) return {};
-  const category = await getDetail(slug, locale);
+  const [category, settings] = await Promise.all([getDetail(slug, locale), getSiteSettings(locale)]);
   if (!category) return {};
-  const image = mediaUrl(category.meta?.image) ?? mediaUrl(category.hero?.image);
-  return {
+  return pageMetadata({
+    locale,
+    siteName: settings?.siteName ?? FALLBACK_SITE_NAME,
     title: category.meta?.title || category.title,
-    description: category.meta?.description || category.hero?.description || undefined,
-    openGraph: image ? { images: [image] } : undefined,
+    description: category.meta?.description || category.hero?.description,
+    image: mediaUrl(category.meta?.image) ?? mediaUrl(category.hero?.image),
     alternates: localeAlternates(`solution/${category.slug}`, locale),
-  };
+  });
 }
 
 export default async function SolutionCategoryPage({ params }: { params: Promise<Params> }) {
