@@ -78,19 +78,21 @@ export function Navbar({
           </LocaleLink>
 
           <nav className="hidden items-center gap-6 lg:flex">
-            <button
-              type="button"
-              aria-expanded={mega}
-              aria-controls="mega-menu"
-              onClick={() => setMega((v) => !v)}
-              className={cn(
-                "flex items-center gap-1 text-sm transition-colors hover:text-accent",
-                mega ? "text-accent" : "text-white",
-              )}
-            >
-              {solutionsLabel}
-              <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", mega && "rotate-180")} />
-            </button>
+            {solutions.length > 0 && (
+              <button
+                type="button"
+                aria-expanded={mega}
+                aria-controls="mega-menu"
+                onClick={() => setMega((v) => !v)}
+                className={cn(
+                  "flex items-center gap-1 text-sm transition-colors hover:text-accent",
+                  mega ? "text-accent" : "text-white",
+                )}
+              >
+                {solutionsLabel}
+                <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", mega && "rotate-180")} />
+              </button>
+            )}
             {navLinks.map((link) => (
               <LocaleLink key={link.id ?? link.label} href={link.href} className="text-sm text-white hover:text-accent">
                 {link.label}

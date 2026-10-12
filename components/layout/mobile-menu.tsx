@@ -132,35 +132,37 @@ export function MobileMenu({
         ) : (
           <div key="list" className="tab-panel-in flex flex-col gap-4 px-6 py-6">
             {first && link(first)}
-            <div className="flex flex-col gap-4">
-              <button
-                type="button"
-                aria-expanded={solsOpen}
-                onClick={() => setSolsOpen((v) => !v)}
-                className={cn(ITEM, "justify-between")}
-              >
-                {solutionsLabel}
-                <ChevronDown
-                  className={cn("h-[18px] w-[18px] transition-transform duration-300", solsOpen && "rotate-180")}
-                />
-              </button>
-              {/* Expands / collapses smoothly (grid rows 0fr ↔ 1fr). */}
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows,opacity,margin] duration-300 ease-out",
-                  solsOpen ? "grid-rows-[1fr] opacity-100" : "-mt-4 grid-rows-[0fr] opacity-0",
-                )}
-                inert={!solsOpen}
-              >
-                <div className="flex min-h-0 flex-col gap-1 overflow-hidden pl-2">
-                  {solutions.map((c) => (
-                    <button key={c.id} type="button" onClick={() => setCategory(c)} className={ITEM}>
-                      {c.title}
-                    </button>
-                  ))}
+            {solutions.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <button
+                  type="button"
+                  aria-expanded={solsOpen}
+                  onClick={() => setSolsOpen((v) => !v)}
+                  className={cn(ITEM, "justify-between")}
+                >
+                  {solutionsLabel}
+                  <ChevronDown
+                    className={cn("h-[18px] w-[18px] transition-transform duration-300", solsOpen && "rotate-180")}
+                  />
+                </button>
+                {/* Expands / collapses smoothly (grid rows 0fr ↔ 1fr). */}
+                <div
+                  className={cn(
+                    "grid transition-[grid-template-rows,opacity,margin] duration-300 ease-out",
+                    solsOpen ? "grid-rows-[1fr] opacity-100" : "-mt-4 grid-rows-[0fr] opacity-0",
+                  )}
+                  inert={!solsOpen}
+                >
+                  <div className="flex min-h-0 flex-col gap-1 overflow-hidden pl-2">
+                    {solutions.map((c) => (
+                      <button key={c.id} type="button" onClick={() => setCategory(c)} className={ITEM}>
+                        {c.title}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             {others.map(link)}
             <LanguageSwitcher className="w-fit" />
             {cta?.href && (

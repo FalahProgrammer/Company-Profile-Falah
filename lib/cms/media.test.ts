@@ -45,4 +45,15 @@ describe("mega menu", () => {
     expect(menu[1]!.href).toBeUndefined();
     expect(menu[1]!.products.map((p) => p.id)).toEqual([12]);
   });
+
+  it("leaves out categories switched off with showInMegaMenu (unset counts as on)", () => {
+    const categories = [
+      { id: 1, title: "VTS", slug: "vts", showInMegaMenu: false },
+      { id: 2, title: "Cyber", slug: "cyber", showInMegaMenu: true },
+      { id: 3, title: "Old", slug: "old", showInMegaMenu: null },
+      { id: 4, title: "Unset", slug: "unset" },
+    ] as SolutionCategory[];
+    const products = [{ id: 10, title: "Ops", category: 1 }] as unknown as Product[];
+    expect(buildMegaMenu(categories, products).map((c) => c.id)).toEqual([2, 3, 4]);
+  });
 });

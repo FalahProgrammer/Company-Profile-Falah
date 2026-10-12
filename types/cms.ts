@@ -241,9 +241,14 @@ export interface HeroBlock {
 export interface Media {
   id: number;
   /**
+   * The name shown in the media library. The file extension stays the same; a name already used gets -1, -2…
+   */
+  displayName?: string | null;
+  /**
    * Alternative text for accessibility & SEO. Leave empty for decorative images.
    */
   alt?: string | null;
+  fileSizeMb?: string | null;
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -911,6 +916,10 @@ export interface SolutionCategory {
    * Turn off while the detail content is not ready (the page returns 404).
    */
   hasDetailPage?: boolean | null;
+  /**
+   * Untick to hide this category, with its products, from the "Our Solutions" menu.
+   */
+  showInMegaMenu?: boolean | null;
   hero?: {
     /**
      * Empty = the category title.
@@ -1871,7 +1880,9 @@ export interface SpacerElementSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  displayName?: T;
   alt?: T;
+  fileSizeMb?: T;
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1960,6 +1971,7 @@ export interface SolutionCategoriesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   hasDetailPage?: T;
+  showInMegaMenu?: T;
   hero?:
     | T
     | {
