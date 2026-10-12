@@ -2,6 +2,7 @@
 
 import type { Media, Page } from "@/types/cms";
 
+import { randomId } from "./random-id";
 import { requestStudioToken, studioToken } from "./token";
 
 /**
@@ -83,8 +84,7 @@ function saveRequest(
         read = newline + 1;
         if (!line) continue;
         const event = JSON.parse(line) as
-          | { type: "stage"; stage: Exclude<SaveStage, "sending"> }
-          | { type: "done"; status: number; body: unknown };
+          { type: "stage"; stage: Exclude<SaveStage, "sending"> } | { type: "done"; status: number; body: unknown };
         if (event.type === "stage") onProgress(event.stage, STAGE_PCT[event.stage]);
         else done = { status: event.status, body: event.body };
       }
@@ -166,7 +166,7 @@ function handOverSave(cmsUrl: string, search: string, body: string, publish: boo
     return Promise.resolve(null);
   }
   return new Promise((resolve) => {
-    const requestId = crypto.randomUUID();
+    const requestId = randomId();
     let accepted = false;
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== origin || event.source !== window.parent || event.data?.requestId !== requestId) return;

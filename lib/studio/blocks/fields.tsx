@@ -10,6 +10,7 @@ import { studioStrings, type StudioLang } from "@/lib/studio/strings";
 import type { Certification, Partner } from "@/types/cms";
 
 import type { AnyProps } from "./metadata";
+import { randomId } from "@/lib/studio/random-id";
 
 export type StudioContext = {
   lang: StudioLang;
@@ -25,7 +26,7 @@ export type StudioContext = {
 export function createFields({ lang, cmsUrl, data, linkGroups }: StudioContext) {
   const s = studioStrings[lang];
   const L = (en: string, id: string) => (lang === "id" ? id : en);
-  const rowId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+  const rowId = () => randomId().replace(/-/g, "").slice(0, 24);
 
   // ── Field builders (mirror the CMS schema) ─────────────────────────────
   // Copy fields are editable directly on the canvas (click the text and type);

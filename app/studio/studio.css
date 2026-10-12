@@ -171,7 +171,6 @@ html:has(.studio-embedded),
   outline-offset: 1px;
 }
 
-
 /* Narrow editor (e.g. embedded next to the CMS sidebar): icon-only buttons. */
 @media (max-width: 1320px) {
   .studio-label {
@@ -216,7 +215,17 @@ html:has(.studio-embedded),
   opacity: 0.55;
 }
 
+/* Publish button with nothing to publish: greyed out; the wrapper keeps a box
+   so its tooltip (title) still shows on hover. */
+.studio-locked {
+  display: inline-flex;
+  cursor: not-allowed;
+}
 
+.studio-locked > * {
+  pointer-events: none;
+  opacity: 0.45;
+}
 
 /* ── Shared small controls ─────────────────────────────────────────────── */
 
