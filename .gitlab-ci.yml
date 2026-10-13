@@ -114,7 +114,7 @@ build:
         --local context=. \
         --local dockerfile=. \
         --opt filename=Dockerfile.landing \
-        --opt build-arg:CMS_PUBLIC_URL="${CMS_PUBLIC_URL-http://localhost:5001}" \
+        --opt build-arg:CMS_PUBLIC_URL="${CMS_PUBLIC_URL:-http://localhost:5001}" \
         --opt build-arg:CMS_MEDIA_URL="${CMS_MEDIA_URL:-http://10.70.0.29:9000/falah-media}" \
         --opt build-arg:CMS_URL="${CMS_URL:-http://localhost:3000}" \
         --output type=image,name=${TAG_COMMIT},push=true,compression=zstd,compression-level=5,force-compression=true,registry.insecure=true \
