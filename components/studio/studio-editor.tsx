@@ -15,6 +15,7 @@ import { puckDictionaryId, studioStrings, type StudioLang, type StudioStrings } 
 import type { Footer, Navigation, Page, User } from "@/types/cms";
 import { StudioFieldCollapse } from "./field-collapse";
 import { signalStudioReady } from "./ready-signal";
+import { useTutorialBridge } from "./tutorial-bridge";
 import { StudioSkeleton } from "./studio-skeleton";
 
 const VIEWPORTS = { desktop: 1440, tablet: 768, mobile: 375 } as const;
@@ -184,6 +185,8 @@ export function StudioEditor(props: StudioEditorProps) {
 
 function StudioEditorClient(props: StudioEditorProps) {
   const { page, locale, uiLang, embedded, cmsUrl, siteData, chrome, dictionary, fontClass, linkGroups } = props;
+  // The CMS tutorial can highlight (and pick) elements of this editor.
+  useTutorialBridge(cmsUrl, embedded);
   const s = studioStrings[uiLang];
 
   const config = useMemo(
