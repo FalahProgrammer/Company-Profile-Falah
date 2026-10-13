@@ -15,6 +15,7 @@ import { puckDictionaryId, studioStrings, type StudioLang, type StudioStrings } 
 import type { Footer, Navigation, Page, User } from "@/types/cms";
 import { StudioFieldCollapse } from "./field-collapse";
 import { signalStudioReady } from "./ready-signal";
+import { useTutorialBridge } from "./tutorial-bridge";
 import { StudioSkeleton } from "./studio-skeleton";
 
 const VIEWPORTS = { desktop: 1440, tablet: 768, mobile: 375 } as const;
@@ -58,12 +59,15 @@ function HeaderActions({
   props,
   s,
   saving,
+  canPublish,
   onSave,
 }: {
   children: ReactNode;
   props: StudioEditorProps;
   s: StudioStrings;
   saving: boolean;
+  /** Something to publish: unsaved edits, or a saved draft newer than the live page. */
+  canPublish: boolean;
   onSave: SaveFn;
 }) {
   const getPuck = useGetPuck();
@@ -103,10 +107,19 @@ function HeaderActions({
       >
         <span className="studio-label">{saving ? s.saving : s.saveDraft}</span>
       </Button>
-      {/* Puck's Publish button: locked while a save is in flight (no double submit). */}
-      <span className={saving ? "studio-busy" : undefined} aria-disabled={saving || undefined}>
-        {children}
-      </span>
+      {/* Puck's Publish button: locked while a save is in flight (no double
+          submit), and when there is nothing to publish. */}
+      {saving ? (
+        <span className="studio-busy" aria-disabled>
+          {children}
+        </span>
+      ) : !canPublish ? (
+        <span className="studio-locked" aria-disabled title={s.nothingToPublish}>
+          {children}
+        </span>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -172,6 +185,8 @@ export function StudioEditor(props: StudioEditorProps) {
 
 function StudioEditorClient(props: StudioEditorProps) {
   const { page, locale, uiLang, embedded, cmsUrl, siteData, chrome, dictionary, fontClass, linkGroups } = props;
+  // The CMS tutorial can highlight (and pick) elements of this editor.
+  useTutorialBridge(cmsUrl, embedded);
   const s = studioStrings[uiLang];
 
   const config = useMemo(
@@ -241,6 +256,9 @@ function StudioEditorClient(props: StudioEditorProps) {
 
   const savedRef = useRef(JSON.stringify([page.title, page.layout]));
   const [dirty, setDirty] = useState(false);
+  // The loaded page is the latest draft; "draft" means it differs from the live page.
+  const [draftPending, setDraftPending] = useState(page._status === "draft");
+  const canPublish = dirty || draftPending;
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   // Leaving with unsaved changes (closing, switching language) asks first.
@@ -295,6 +313,7 @@ function StudioEditorClient(props: StudioEditorProps) {
       );
       savedRef.current = JSON.stringify([title, layout]);
       setDirty(false);
+      setDraftPending(!publish);
       if (handedOver) {
         setStatus({ kind: "idle" });
         return;
@@ -307,9 +326,14 @@ function StudioEditorClient(props: StudioEditorProps) {
       const code = error instanceof StudioApiError ? error.status : 0;
       const message =
         code === 401 ? s.sessionExpired : code === 403 ? s.forbidden : (error as Error).message || "Error";
-      setStatus({ kind: "error", message });
-      // Handed over to the CMS: it already shows the error.
-      if (!savingHere) setStatus({ kind: "idle" });
+      // A save the CMS ran and answered: it already shows the error. Anything
+      // else (a failure here, before the hand-over) must not vanish silently.
+      if (!savingHere && error instanceof StudioApiError && code !== 0) {
+        setStatus({ kind: "idle" });
+      } else {
+        setOwnToast(true);
+        setStatus({ kind: "error", message });
+      }
     }
   };
 
@@ -329,10 +353,10 @@ function StudioEditorClient(props: StudioEditorProps) {
         headerTitle={embedded ? "" : page.title}
         headerPath={embedded ? "" : `/${locale}${page.slug === "home" ? "" : `/${page.slug}`}`}
         onChange={onChange}
-        onPublish={(data) => save(data, true)}
+        onPublish={(data) => (canPublish ? save(data, true) : undefined)}
         overrides={{
           headerActions: ({ children }) => (
-            <HeaderActions props={props} s={s} saving={status.kind === "saving"} onSave={save}>
+            <HeaderActions props={props} s={s} saving={status.kind === "saving"} canPublish={canPublish} onSave={save}>
               {children}
             </HeaderActions>
           ),
@@ -353,9 +377,7 @@ function StudioEditorClient(props: StudioEditorProps) {
           </span>
           <span className="studio-toast__body">
             <span className="studio-toast__row">
-              <span>
-                {status.kind === "saving" ? (status.publish ? s.publishing : s.savingDraft) : status.message}
-              </span>
+              <span>{status.kind === "saving" ? (status.publish ? s.publishing : s.savingDraft) : status.message}</span>
               {status.kind === "saving" && <span className="studio-toast__pct">{Math.round(progress.pct)}%</span>}
             </span>
             {status.kind === "saving" && (

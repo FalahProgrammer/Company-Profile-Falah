@@ -68,7 +68,7 @@ export const getSolutionCategory = cache(async (slug: string, locale: Locale) =>
 export const getProducts = cache(async (locale: Locale): Promise<Product[]> => {
   if (!cmsConfigured) return [];
   const { docs } = await cmsFetch<PaginatedDocs<Product>>("/api/products", {
-    query: { ...inLocale(locale), sort: "_order", depth: 1, limit: 200 },
+    query: { ...published, ...inLocale(locale), sort: "_order", depth: 1, limit: 200 },
     tags: ["products", "solution-categories", "media"],
   });
   return docs;
@@ -77,7 +77,7 @@ export const getProducts = cache(async (locale: Locale): Promise<Product[]> => {
 export const getPartners = cache(async (locale: Locale): Promise<Partner[]> => {
   if (!cmsConfigured) return [];
   const { docs } = await cmsFetch<PaginatedDocs<Partner>>("/api/partners", {
-    query: { ...inLocale(locale), sort: "_order", depth: 1, limit: 100 },
+    query: { ...published, ...inLocale(locale), sort: "_order", depth: 1, limit: 100 },
     tags: ["partners", "media"],
   });
   return docs;
@@ -86,7 +86,7 @@ export const getPartners = cache(async (locale: Locale): Promise<Partner[]> => {
 export const getCertifications = cache(async (locale: Locale): Promise<Certification[]> => {
   if (!cmsConfigured) return [];
   const { docs } = await cmsFetch<PaginatedDocs<Certification>>("/api/certifications", {
-    query: { ...inLocale(locale), sort: "_order", depth: 1, limit: 50 },
+    query: { ...published, ...inLocale(locale), sort: "_order", depth: 1, limit: 50 },
     tags: ["certifications", "media"],
   });
   return docs;
