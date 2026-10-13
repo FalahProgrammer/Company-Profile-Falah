@@ -16,6 +16,12 @@ const ICONS = {
   arrow: "/about/icon-arrow.svg",
 };
 
+/** A phone number as digits only, keeping one leading + (country code); at most 16 characters. */
+const phoneDigits = (value: string) => {
+  const trimmed = value.trimStart();
+  return ((trimmed.startsWith("+") ? "+" : "") + trimmed.replace(/\D/g, "")).slice(0, 16);
+};
+
 type Status = { state: "idle" | "submitting" } | { state: "success" } | { state: "error"; message: string };
 type FieldErrors = Partial<Record<ContactField, true>>;
 
@@ -57,6 +63,8 @@ function Field({
   type = "text",
   autoComplete,
   error,
+  inputMode,
+  sanitize,
 }: {
   id: string;
   icon: string;
@@ -66,6 +74,9 @@ function Field({
   type?: string;
   autoComplete?: string;
   error?: string;
+  inputMode?: "numeric" | "tel" | "email" | "text";
+  /** Rewrites the value as it is typed or pasted (e.g. digits only). */
+  sanitize?: (value: string) => string;
 }) {
   const inputId = `${id}-${name}`;
   return (
@@ -86,6 +97,16 @@ function Field({
           name={name}
           required
           autoComplete={autoComplete}
+          inputMode={inputMode}
+          onInput={
+            sanitize
+              ? (e) => {
+                  const input = e.currentTarget;
+                  const clean = sanitize(input.value);
+                  if (clean !== input.value) input.value = clean;
+                }
+              : undefined
+          }
           placeholder={placeholder}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${inputId}-error` : undefined}
@@ -204,8 +225,10 @@ export function ContactForm({
             placeholder={t.contact.phonePlaceholder}
             name="phone"
             type="tel"
+            inputMode="tel"
             autoComplete="tel"
             error={errorFor("phone")}
+            sanitize={phoneDigits}
           />
         </div>
         {/* Figma: interest and detail each take a full row. */}
