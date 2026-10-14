@@ -8,10 +8,11 @@ export const contactSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
   organization: z.string().trim().min(2).max(160),
   email: z.string().trim().toLowerCase().pipe(z.email().max(200)),
+  // Digits only (a leading + for the country code): 8–15 digits, the international maximum.
   phone: z
     .string()
     .trim()
-    .regex(/^\+?[0-9\s\-()]{6,20}$/),
+    .regex(/^\+?[0-9]{8,15}$/),
   interest: z.string().trim().max(120).optional().default(""),
   message: z.string().trim().max(2000).optional().default(""),
 });

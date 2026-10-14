@@ -67,8 +67,16 @@ export async function POST(request: NextRequest) {
         client: { ip, userAgent: (request.headers.get("user-agent") ?? "unknown").slice(0, 300) },
       }),
       cache: "no-store",
-      signal: AbortSignal.timeout(10_000),
+      // The CMS checks the address (DNS, its mail server) before accepting it.
+      signal: AbortSignal.timeout(20_000),
     });
+    if (res.status === 400) {
+      // The CMS refused the content (e.g. an email address that can't receive
+      // mail): show the visitor which field to fix.
+      const refused = (await res.json().catch(() => ({}))) as { issues?: Record<string, unknown> };
+      const fields = Object.keys(refused.issues ?? {}).filter((f) => f in parsed.data);
+      return NextResponse.json({ error: "invalid", fields }, { status: 400 });
+    }
     if (!res.ok) throw new Error(`CMS responded ${res.status}`);
   } catch (error) {
     console.error("Failed to forward contact submission", error);
